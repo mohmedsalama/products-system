@@ -16,7 +16,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::all();
+        $categories = Category::withCount('products')->get();
         return response()->json([
             'success' => true,
             'message' => 'Categories retrieved successfully.',
@@ -49,7 +49,7 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        $category->load('products');
+        $category->load('products')->loadCount('products');
         return response()->json([
             'success' => true,
             'message' => 'Category retrieved successfully.',
