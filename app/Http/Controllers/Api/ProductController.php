@@ -19,7 +19,7 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::query()
-            ->with('images')
+            ->with(['images', 'category'])
             ->latest()
             ->paginate(6);
 
@@ -45,7 +45,7 @@ class ProductController extends Controller
             'status_code' => 201,
             'message' => 'Product created successfully',
             'data' => new ProductResource(
-                $product->load('images')
+                $product->load(['images', 'category'])
             )
         ], 201);
     }
@@ -60,7 +60,7 @@ class ProductController extends Controller
     return response()->json([
         'status_code' => 200,
         'message' => 'Product updated successfully',
-        'data' => new ProductResource($product),
+        'data' => new ProductResource($product->load(['images', 'category'])),
     ]);
 }
 
