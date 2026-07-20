@@ -19,6 +19,7 @@ Route::prefix('products')->group(function () {
     Route::post('/', [ProductController::class, 'store']);
     Route::put('/{product}', [ProductController::class, 'update']);
     Route::delete('/{product}', [ProductController::class, 'destroy']);
+    Route::get('/{product}', [ProductController::class, 'show']);
 });
 
 Route::apiResource('categories', CategoryController::class);
