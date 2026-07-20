@@ -514,8 +514,8 @@
             <button class="search-btn secondary" onclick="convSearch()">بحث في المحادثة</button>
         </div>
 
-        <!-- Messages Area -->
-        <div class="messages-area" id="messagesArea">
+        <!-- Messages Wrapper (for positioning search overlay correctly) -->
+        <div style="position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0;">
             <!-- Search Results Overlay -->
             <div class="search-results" id="searchResultsOverlay">
                 <div class="search-results-header">
@@ -524,7 +524,11 @@
                 </div>
                 <div id="searchResultsList"></div>
             </div>
-            <!-- Messages will load here dynamically -->
+
+            <!-- Messages Area -->
+            <div class="messages-area" id="messagesArea">
+                <!-- Messages will load here dynamically -->
+            </div>
         </div>
 
         <!-- Input Area -->
