@@ -195,6 +195,145 @@
             min-height: 48px;
         }
 
+        /* Search Panel */
+        .search-panel {
+            padding: 10px 20px;
+            background: rgba(15, 23, 42, 0.3);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-input-wrap {
+            flex: 1;
+            min-width: 160px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 7px 36px 7px 12px;
+            color: var(--text-main);
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus { border-color: var(--primary-accent); }
+
+        .search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.5;
+            font-size: 0.85rem;
+            pointer-events: none;
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, var(--primary-accent), var(--secondary-accent));
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 7px 16px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+        }
+
+        .search-btn:hover { opacity: 0.85; }
+        .search-btn.secondary {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid var(--glass-border);
+        }
+
+        /* Search Results Overlay */
+        .search-results {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.97);
+            z-index: 10;
+            overflow-y: auto;
+            padding: 20px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .search-results.visible { display: flex; }
+
+        .search-results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .search-results-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--primary-accent);
+        }
+
+        .search-close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 0 4px;
+            line-height: 1;
+        }
+
+        .search-result-item {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            transition: border-color 0.2s;
+        }
+
+        .search-result-item:hover { border-color: var(--primary-accent); }
+
+        .search-result-meta {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-result-text {
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .search-highlight {
+            background: rgba(99, 102, 241, 0.35);
+            border-radius: 3px;
+            padding: 0 2px;
+            font-weight: 700;
+        }
+
+        .search-empty {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 40px;
+            font-size: 0.9rem;
+        }
+
+        /* Messages area must be relative for overlay */
+        .messages-area { position: relative; }
+
         .online-panel-label {
             font-size: 0.72rem;
             color: var(--text-muted);
@@ -354,8 +493,37 @@
             </div>
         </div>
 
+        <!-- Search Panel -->
+        <div class="search-panel">
+            <!-- Global Search -->
+            <div class="search-input-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" id="globalSearchInput"
+                    placeholder="بحث عام في كل المحادثات..."
+                    onkeydown="if(event.key==='Enter') globalSearch()">
+            </div>
+            <button class="search-btn" onclick="globalSearch()">بحث عام</button>
+
+            <!-- Conversation Search -->
+            <div class="search-input-wrap">
+                <span class="search-icon">💬</span>
+                <input type="text" class="search-input" id="convSearchInput"
+                    placeholder="بحث في هذه المحادثة..."
+                    onkeydown="if(event.key==='Enter') convSearch()">
+            </div>
+            <button class="search-btn secondary" onclick="convSearch()">بحث في المحادثة</button>
+        </div>
+
         <!-- Messages Area -->
         <div class="messages-area" id="messagesArea">
+            <!-- Search Results Overlay -->
+            <div class="search-results" id="searchResultsOverlay">
+                <div class="search-results-header">
+                    <span class="search-results-title" id="searchResultsTitle">نتائج البحث</span>
+                    <button class="search-close-btn" onclick="closeSearch()">✕</button>
+                </div>
+                <div id="searchResultsList"></div>
+            </div>
             <!-- Messages will load here dynamically -->
         </div>
 
@@ -436,9 +604,83 @@
             heartbeatInterval = null;
         }
 
+        // ─── Search ───────────────────────────────────────────────────
+
+        function highlightText(text, keyword) {
+            if (!keyword) return text;
+            const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            return text.replace(new RegExp(`(${escaped})`, 'gi'),
+                '<span class="search-highlight">$1</span>');
+        }
+
+        function renderSearchResults(results, keyword, title) {
+            const overlay = document.getElementById('searchResultsOverlay');
+            const list    = document.getElementById('searchResultsList');
+            document.getElementById('searchResultsTitle').textContent = title;
+
+            list.innerHTML = '';
+
+            if (results.length === 0) {
+                list.innerHTML = `<div class="search-empty">😔 لا توجد نتائج لـ "<strong>${keyword}</strong>"</div>`;
+            } else {
+                results.forEach(msg => {
+                    const time = msg.created_at
+                        ? new Date(msg.created_at).toLocaleString('ar-EG')
+                        : '';
+                    const item = document.createElement('div');
+                    item.className = 'search-result-item';
+                    item.innerHTML = `
+                        <div class="search-result-meta">
+                            <span>👤 ${msg.sender?.name ?? ''}</span>
+                            ${msg.conversation ? `<span>💬 محادثة #${msg.conversation.id}</span>` : ''}
+                            <span>🕐 ${time}</span>
+                        </div>
+                        <div class="search-result-text">${highlightText(msg.message, keyword)}</div>
+                    `;
+                    list.appendChild(item);
+                });
+            }
+
+            overlay.classList.add('visible');
+        }
+
+        function closeSearch() {
+            document.getElementById('searchResultsOverlay').classList.remove('visible');
+            document.getElementById('globalSearchInput').value = '';
+            document.getElementById('convSearchInput').value   = '';
+        }
+
+        async function globalSearch() {
+            const keyword = document.getElementById('globalSearchInput').value.trim();
+            if (!keyword) return;
+            try {
+                const res  = await fetch(`/api/chat/search?q=${encodeURIComponent(keyword)}`);
+                const data = await res.json();
+                renderSearchResults(data.data ?? [], keyword,
+                    `بحث عام: "${keyword}" — ${data.count ?? 0} نتيجة`);
+            } catch (e) {
+                console.error('globalSearch error:', e);
+            }
+        }
+
+        async function convSearch() {
+            const keyword = document.getElementById('convSearchInput').value.trim();
+            const convId  = parseInt(document.getElementById('conversationIdInput').value);
+            if (!keyword) return;
+            try {
+                const res  = await fetch(`/api/chat/conversations/${convId}/search?q=${encodeURIComponent(keyword)}`);
+                const data = await res.json();
+                renderSearchResults(data.data ?? [], keyword,
+                    `بحث في محادثة #${convId}: "${keyword}" — ${data.count ?? 0} نتيجة`);
+            } catch (e) {
+                console.error('convSearch error:', e);
+            }
+        }
+
         // ─── Messages history ────────────────────────────────────────
 
         async function fetchMessages(conversationId) {
+
             try {
                 const response = await fetch(`/api/chat/conversations/${conversationId}/messages`);
                 const result = await response.json();
