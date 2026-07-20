@@ -542,6 +542,7 @@
     <script>
         let socket = null;
         let heartbeatInterval = null;
+        let loggedInUserId = null;
         const REVERB_KEY = 'wf';
         const REVERB_PORT = 8080;
 
@@ -853,6 +854,13 @@
         function loadMessagesAndReconnect() {
             const conversationId = parseInt(document.getElementById('conversationIdInput').value);
             const userId = parseInt(document.getElementById('currentUserSelect').value);
+            
+            // Mark previous user offline immediately if we switched users
+            if (loggedInUserId !== null && loggedInUserId !== userId) {
+                setUserOffline(loggedInUserId);
+            }
+            loggedInUserId = userId;
+
             fetchMessages(conversationId);
             connectWebsocket(conversationId);
             // Re-register presence whenever user/conv changes
@@ -864,6 +872,9 @@
         window.onload = () => {
             const conversationId = parseInt(document.getElementById('conversationIdInput').value);
             const userId = parseInt(document.getElementById('currentUserSelect').value);
+            
+            loggedInUserId = userId;
+            
             fetchMessages(conversationId);
             connectWebsocket(conversationId);
             fetchOnlineUsers();
