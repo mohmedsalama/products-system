@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\MessageController;
+use App\Http\Controllers\Api\UserPresenceController;
 
 
 
@@ -20,5 +21,10 @@ Route::prefix('chat')->group(function () {
     Route::get('/conversations/{conversation}/messages', [MessageController::class, 'index']);
 
     Route::post('/messages', [MessageController::class, 'store']);
+
+    // Presence (Online/Offline)
+    Route::get('/users/online', [UserPresenceController::class, 'onlineUsers']);
+    Route::post('/presence/online', [UserPresenceController::class, 'setOnline']);
+    Route::post('/presence/offline', [UserPresenceController::class, 'setOffline']);
 
 });
