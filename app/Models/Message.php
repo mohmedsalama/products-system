@@ -15,6 +15,15 @@ class Message extends Model
         'attachment_type',
     ];
 
+    protected $appends = [
+        'file_url',
+    ];
+
+    public function getFileUrlAttribute(): ?string
+    {
+        return $this->attachment ? asset('storage/' . $this->attachment) : null;
+    }
+
     public function conversation(): BelongsTo
     {
         return $this->belongsTo(Conversation::class);

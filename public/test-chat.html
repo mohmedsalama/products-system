@@ -1029,7 +1029,7 @@
             // Build attachment HTML
             let attachmentHtml = '';
             if (msg.attachment) {
-                const url = `/storage/${msg.attachment}`;
+                const url = msg.file_url || `/storage/${msg.attachment}`;
                 const filename = msg.attachment.split('/').pop() || 'ملف مرفق';
 
                 if (msg.attachment_type === 'image') {
