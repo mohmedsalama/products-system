@@ -1,0 +1,24 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('messages', function (Blueprint $table) {
+            // nullable — رسائل نصية مش هيكون فيها attachment
+            $table->string('attachment')->nullable()->after('message');
+            $table->string('attachment_type')->nullable()->after('attachment'); // image | file | video
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('messages', function (Blueprint $table) {
+            $table->dropColumn(['attachment', 'attachment_type']);
+        });
+    }
+};

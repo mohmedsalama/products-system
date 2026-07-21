@@ -14,7 +14,10 @@ Route::prefix('chat')->group(function () {
     Route::post('/conversations', [ConversationController::class, 'store']);
     Route::get('/conversations/{conversation}', [ConversationController::class, 'show']);
 
-    // Messages
+    // Messages & Attachments
+    Route::get('/messages', [MessageController::class, 'allMessages']);
+    Route::get('/attachments', [MessageController::class, 'attachments']);
+    Route::get('/conversations/{conversation}/attachments', [MessageController::class, 'attachments']);
     Route::get('/conversations/{conversation}/messages', [MessageController::class, 'index']);
     Route::post('/messages', [MessageController::class, 'store']);
 

@@ -68,18 +68,27 @@ class UserPresenceController extends Controller
     }
 
     /**
-     * Return all currently online users.
+     * Return users status list (supports ?status=online / offline / all).
      */
-    public function onlineUsers()
+    public function onlineUsers(Request $request)
     {
+        $statusFilter = $request->query('status');
+
         $users = User::all()->map(function ($user) {
-            $cached = Cache::get("online_user_{$user->id}");
+            $isOnline = Cache::has("online_user_{$user->id}");
             return [
                 'id'        => $user->id,
                 'name'      => $user->name,
-                'is_online' => (bool) $cached,
+                'is_online' => $isOnline,
+                'status'    => $isOnline ? 'online' : 'offline',
             ];
         });
+
+        if ($statusFilter === 'online') {
+            $users = $users->filter(fn($u) => $u['is_online'])->values();
+        } elseif ($statusFilter === 'offline') {
+            $users = $users->filter(fn($u) => ! $u['is_online'])->values();
+        }
 
         return response()->json([
             'success' => true,

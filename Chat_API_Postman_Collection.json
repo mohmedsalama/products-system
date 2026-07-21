@@ -1,0 +1,266 @@
+{
+	"info": {
+		"_postman_id": "c1f7a83d-9876-4321-a123-realtimechat01",
+		"name": "RealTime Chat System API",
+		"description": "جميع الـ APIs الخاصة بالنظام: المحادثات، الرسائل، رفع المرفقات والملفات، الحضور أونلاين/أوفلاين، والبحث.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. الرسائل والمرفقات (Messages & Attachments)",
+			"item": [
+				{
+					"name": "إرسال رسالة (نص + صورة / فويس / ملف)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "conversation_id",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "sender_id",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "message",
+									"value": "سلام عليكم، شوف الملف ده",
+									"type": "text"
+								},
+								{
+									"key": "attachment",
+									"description": "اختر صورة أو فيديو أو فويس (webm/mp3) أو مستند (pdf/zip...)",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/chat/messages",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"chat",
+								"messages"
+							]
+						}
+					}
+				},
+				{
+					"name": "جلب الرسائل (مع إمكانية الفلترة)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/chat/messages?conversation_id=2",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"chat",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "conversation_id",
+									"value": "2",
+									"description": "اختياري: فلترة حسب رقم المحادثة"
+								},
+								{
+									"key": "sender_id",
+									"value": "1",
+									"disabled": true,
+									"description": "اختياري: فلترة حسب المرسل"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "جلب الملفات والمرفقات المرفوعة (GET Attachments)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/chat/attachments?type=image",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"chat",
+								"attachments"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "image",
+									"description": "اختياري: (image | video | audio | file)"
+								},
+								{
+									"key": "conversation_id",
+									"value": "2",
+									"disabled": true,
+									"description": "اختياري: فلترة حسب المحادثة"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. التواجد أونلاين / أوفلاين (Presence)",
+			"item": [
+				{
+					"name": "تحديد المستخدم أونلاين (Heartbeat)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": 1\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/chat/presence/online",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"chat",
+								"presence",
+								"online"
+							]
+						}
+					}
+				},
+				{
+					"name": "تحديد المستخدم أوفلاين",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": 1\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/chat/presence/offline",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"chat",
+								"presence",
+								"offline"
+							]
+						}
+					}
+				},
+				{
+					"name": "جلب حالة المتواجدين (الكل أو أونلاين فقط)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/chat/users/online?status=all",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"chat",
+								"users",
+								"online"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "all",
+									"description": "all = يعيد كل المستخدمين (أونلاين+أوفلاين), online = أونلاين فقط, offline = أوفلاين فقط"
+								}
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}

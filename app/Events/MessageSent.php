@@ -46,6 +46,8 @@ class MessageSent implements \Illuminate\Contracts\Broadcasting\ShouldBroadcastN
                 'conversation_id' => $this->message->conversation_id,
                 'sender_id'       => $this->message->sender_id,
                 'message'         => $this->message->message,
+                'attachment'      => $this->message->attachment,
+                'attachment_type' => $this->message->attachment_type,
                 'created_at'      => $this->message->created_at->toISOString(),
                 'sender'          => [
                     'id'   => $this->message->sender->id,
